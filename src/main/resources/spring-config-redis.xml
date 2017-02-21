@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig"></bean>
+
+	<bean id="jedis.shardInfo1" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="${redis.host1}" />
+		<constructor-arg index="1" value="${redis.port1}" />
+	</bean>
+	<bean id="jedis.shardInfo2" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="${redis.host2}" />
+		<constructor-arg index="1" value="${redis.port2}" />
+	</bean>
+	<bean id="jedis.shardInfo3" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="${redis.host3}" />
+		<constructor-arg index="1" value="${redis.port3}" />
+	</bean>
+	
+	<bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1">
+			<list>
+				<ref bean="jedis.shardInfo1" />			  			  
+				<ref bean="jedis.shardInfo2" />
+				<ref bean="jedis.shardInfo3" />
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="redisDB" class="com.igaming.common.redis.RedisDB"  >
+		<property name="shardedJedisPool" ref="shardedJedisPool" />
+	</bean>
+	
+
+</beans>

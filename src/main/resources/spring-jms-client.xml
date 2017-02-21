@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd">
+	<!-- 配置客户端消息工厂 -->
+		<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+		<property name="connectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL" value="${activemq.broker.url1}" /><!-- 
+					mq地址 -->
+				<property name="userName" value="${activemq.username}" />
+				<property name="password" value="${activemq.password}" />
+			</bean>
+		</property>
+		<!-- <property name="maxConnections" value="2"></property> -->
+	</bean>
+
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<!-- 区别它采用的模式为false是p2p为true是订阅 -->
+		<property name="pubSubDomain" value="true" />
+	</bean>
+
+
+
+	<bean id="sendLogDestination" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg>
+			<value>igaming.logs</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="logManager" class="com.igaming.activemq.LogSender"
+		init-method="init" destroy-method="close">
+		<property name="jmsTemplate" ref="jmsTemplate" />
+		<property name="destination" ref="sendLogDestination" />
+	</bean>
+
+
+</beans>
